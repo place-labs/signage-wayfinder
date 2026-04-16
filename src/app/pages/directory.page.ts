@@ -21,11 +21,7 @@ import {
 } from 'rxjs/operators';
 
 import { IconComponent } from '../components/icon.component';
-import {
-    DirectoryUser,
-    LocateService,
-    LocationNotFoundError,
-} from '../services/locate.service';
+import { DirectoryUser, LocateService, LocationNotFoundError } from '../services/locate.service';
 import { SystemService } from '../services/system.service';
 
 interface DirectoryState {
@@ -44,7 +40,7 @@ const INITIAL_STATE: DirectoryState = { users: [], loading: false, error: false 
             class="flex h-full w-full flex-col bg-[var(--mat-sys-surface)] text-[var(--mat-sys-on-surface)]"
         >
             <header class="flex shrink-0 flex-col gap-3 p-4 sm:p-6">
-                <h1 class="pl-10 text-2xl font-semibold">Directory</h1>
+                <h1 class="text-2xl font-semibold">Directory</h1>
                 <div class="relative">
                     <icon
                         class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-xl text-gray-500"
@@ -116,7 +112,9 @@ const INITIAL_STATE: DirectoryState = { users: [], loading: false, error: false 
                                         class="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-blue-100 text-lg font-semibold text-blue-700"
                                     >
                                         @if (is_active) {
-                                            <icon class="animate-spin text-2xl">progress_activity</icon>
+                                            <icon class="animate-spin text-2xl"
+                                                >progress_activity</icon
+                                            >
                                         } @else if (user.photo) {
                                             <img
                                                 [src]="user.photo"
@@ -155,10 +153,7 @@ const INITIAL_STATE: DirectoryState = { users: [], loading: false, error: false 
                         }
                     </ul>
                     @if (locate_error(); as err) {
-                        <p
-                            class="mt-3 flex items-center gap-1 text-sm text-red-600"
-                            role="alert"
-                        >
+                        <p class="mt-3 flex items-center gap-1 text-sm text-red-600" role="alert">
                             <icon class="text-base">error</icon>
                             <span>{{ err }}</span>
                         </p>

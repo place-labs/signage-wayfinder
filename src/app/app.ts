@@ -60,10 +60,10 @@ import { SignagePlayer } from './signage-player';
                     <button
                         matRipple
                         routerLink="/"
-                        class="absolute top-3 left-3 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--mat-sys-primary)] text-[var(--mat-sys-on-primary)] shadow-md hover:brightness-110"
+                        class="absolute! top-3 right-3 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-blue-600 bg-blue-500 text-white shadow-md"
                         aria-label="Back to signage"
                     >
-                        <icon class="text-xl">arrow_back</icon>
+                        <icon class="text-2xl">arrow_back</icon>
                     </button>
                 }
             </main>
