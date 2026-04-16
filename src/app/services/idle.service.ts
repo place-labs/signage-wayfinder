@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 
 import { SettingsService } from './settings.service';
 
-const DEFAULT_TIMEOUT_MS = 5 * 60 * 1000;
+const DEFAULT_TIMEOUT_SECS = 1 * 60;
 const IDLE_EVENTS: Array<keyof DocumentEventMap> = [
     'pointerdown',
     'keydown',
@@ -18,8 +18,8 @@ export class IdleService {
     private readonly _destroy = inject(DestroyRef);
 
     private readonly _timeout_signal = this._settings.signal<number>(
-        'idle_timeout_ms',
-        DEFAULT_TIMEOUT_MS,
+        'idle_timeout_secs',
+        DEFAULT_TIMEOUT_SECS,
     );
 
     private _timer: ReturnType<typeof setTimeout> | null = null;
@@ -27,8 +27,8 @@ export class IdleService {
 
     private readonly _reset = () => {
         if (this._timer) clearTimeout(this._timer);
-        const delay = this._timeout_signal() || DEFAULT_TIMEOUT_MS;
-        this._timer = setTimeout(() => this._onIdle(), delay);
+        const secs = this._timeout_signal() || DEFAULT_TIMEOUT_SECS;
+        this._timer = setTimeout(() => this._onIdle(), secs * 1000);
     };
 
     constructor() {

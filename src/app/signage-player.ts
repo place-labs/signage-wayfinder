@@ -21,8 +21,12 @@ import { SettingsService } from './services/settings.service';
                 title="PlaceOS Signage"
             ></iframe>
         } @else {
-            <icon class="text-6xl">desktop_access_disabled</icon>
-            <p>Signage is not configured for this display.</p>
+            <div
+                class="flex h-full w-full flex-col items-center justify-center gap-4 p-8 opacity-30"
+            >
+                <icon class="text-8xl">desktop_access_disabled</icon>
+                <p>Signage is not configured for this display.</p>
+            </div>
         }
     `,
     styles: [

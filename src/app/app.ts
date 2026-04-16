@@ -7,6 +7,7 @@ import { filter, map, startWith } from 'rxjs/operators';
 import { IconComponent } from './components/icon.component';
 import { IdleService } from './services/idle.service';
 import { PlaceOSService } from './services/placeos.service';
+import { SystemService } from './services/system.service';
 import { SignagePlayer } from './signage-player';
 
 @Component({
@@ -21,7 +22,7 @@ import { SignagePlayer } from './signage-player';
     ],
     template: `
         <div
-            class="flex h-full w-full bg-[var(--mat-sys-surface)] portrait:flex-col landscape:flex-row"
+            class="relative flex h-full w-full bg-[var(--mat-sys-surface)] portrait:flex-col landscape:flex-row"
         >
             <nav
                 class="flex shrink-0 items-center justify-around gap-2 bg-gray-200 p-2 portrait:h-22 portrait:w-full portrait:flex-row landscape:h-full landscape:w-28 landscape:flex-col landscape:justify-start"
@@ -52,6 +53,16 @@ import { SignagePlayer } from './signage-player';
                 <div class="absolute inset-0 z-10">
                     <router-outlet />
                 </div>
+                @if (hide_signage()) {
+                    <button
+                        matRipple
+                        routerLink="/"
+                        class="absolute top-3 left-3 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--mat-sys-primary)] text-[var(--mat-sys-on-primary)] shadow-md hover:brightness-110"
+                        aria-label="Back to signage"
+                    >
+                        <icon class="text-xl">arrow_back</icon>
+                    </button>
+                }
             </main>
         </div>
     `,
@@ -69,6 +80,7 @@ export class App implements OnInit {
     private readonly _placeos = inject(PlaceOSService);
     private readonly _router = inject(Router);
     private readonly _idle = inject(IdleService);
+    private readonly _system = inject(SystemService);
 
     protected readonly title = signal('signage-wayfinder');
     protected readonly ready = this._placeos.ready;
@@ -87,6 +99,7 @@ export class App implements OnInit {
     );
 
     async ngOnInit(): Promise<void> {
+        this._system.init();
         await this._placeos.init();
         this._idle.start();
     }
