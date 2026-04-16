@@ -1,3 +1,4 @@
+import { provideHttpClient } from '@angular/common/http';
 import {
     ApplicationConfig,
     isDevMode,
@@ -13,6 +14,7 @@ export const appConfig: ApplicationConfig = {
     providers: [
         provideBrowserGlobalErrorListeners(),
         provideZonelessChangeDetection(),
+        provideHttpClient(),
         provideRouter(routes, withHashLocation()),
         provideServiceWorker('ngsw-worker.js', {
             enabled: !isDevMode(),

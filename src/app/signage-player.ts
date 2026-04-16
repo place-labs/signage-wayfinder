@@ -1,11 +1,9 @@
 import { Component, ElementRef, computed, effect, inject, input, viewChild } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { ActivatedRoute } from '@angular/router';
-import { map } from 'rxjs/operators';
 
 import { IconComponent } from './components/icon.component';
 import { SettingsService } from './services/settings.service';
+import { SystemService } from './services/system.service';
 
 @Component({
     selector: 'signage-player',
@@ -44,9 +42,9 @@ import { SettingsService } from './services/settings.service';
     imports: [IconComponent],
 })
 export class SignagePlayer {
-    private readonly _route = inject(ActivatedRoute);
     private readonly _sanitizer = inject(DomSanitizer);
     private readonly _settings = inject(SettingsService);
+    private readonly _systems = inject(SystemService);
 
     readonly hide = input<boolean>(false);
 
@@ -54,12 +52,7 @@ export class SignagePlayer {
 
     private readonly _frame = viewChild<ElementRef<HTMLIFrameElement>>('frame');
 
-    public readonly system = toSignal(
-        this._route.queryParamMap.pipe(
-            map((params) => params.get('system') || params.get('system_id')),
-        ),
-        { initialValue: null as string | null },
-    );
+    public readonly system = this._systems.system;
 
     readonly embed_url = computed<string>(() => {
         const base = (this.signage_url() || '/signage').replace(/\/$/, '');

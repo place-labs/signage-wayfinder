@@ -1,5 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { Router } from '@angular/router';
 import { executeOnSystem } from '@placeos/ts-client';
 import { combineLatest, of } from 'rxjs';
 import {
@@ -12,6 +13,7 @@ import {
 } from 'rxjs/operators';
 
 import { IconComponent } from '../components/icon.component';
+import { LocateService, LocationNotFoundError } from '../services/locate.service';
 import { SystemService } from '../services/system.service';
 
 interface DirectoryUser {
@@ -100,47 +102,66 @@ const INITIAL_STATE: DirectoryState = { users: [], loading: false, error: false 
                 } @else {
                     <ul class="flex flex-col gap-2">
                         @for (user of users(); track trackUser($index, user)) {
-                            <li
-                                class="flex items-center gap-2 rounded-xl bg-white p-2 shadow-sm ring-1 ring-gray-100"
-                            >
-                                <div
-                                    class="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-blue-100 text-lg font-semibold text-blue-700"
+                            @let user_key = trackUser($index, user);
+                            @let is_active = locating_id() === user_key;
+                            <li>
+                                <button
+                                    type="button"
+                                    class="flex w-full items-center gap-2 rounded-xl bg-white p-2 text-left shadow-sm ring-1 ring-gray-100 transition hover:bg-blue-50 hover:ring-blue-200 disabled:opacity-60"
+                                    [disabled]="!!locating_id()"
+                                    (click)="onSelect(user, user_key)"
                                 >
-                                    @if (user.photo) {
-                                        <img
-                                            [src]="user.photo"
-                                            alt=""
-                                            class="h-full w-full object-cover"
-                                        />
-                                    } @else {
-                                        <span>{{ initials(user) }}</span>
-                                    }
-                                </div>
-                                <div class="flex min-w-0 flex-1 flex-col">
-                                    <div class="flex min-w-0 items-baseline gap-2 truncate">
-                                        <span
-                                            class="truncate text-base font-semibold text-gray-900"
-                                        >
-                                            {{ user.name || user.email }}
-                                        </span>
-                                        @if (user.email && user.name) {
-                                            <span
-                                                class="truncate font-mono text-sm font-normal text-gray-500"
-                                            >
-                                                {{ user.email }}
-                                            </span>
+                                    <div
+                                        class="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-blue-100 text-lg font-semibold text-blue-700"
+                                    >
+                                        @if (is_active) {
+                                            <icon class="animate-spin text-2xl">progress_activity</icon>
+                                        } @else if (user.photo) {
+                                            <img
+                                                [src]="user.photo"
+                                                alt=""
+                                                class="h-full w-full object-cover"
+                                            />
+                                        } @else {
+                                            <span>{{ initials(user) }}</span>
                                         }
                                     </div>
-                                    <div
-                                        class="flex items-center gap-1 truncate text-sm text-gray-500"
-                                    >
-                                        <icon class="-ml-1 text-base">place</icon>
-                                        <span class="truncate">{{ user.office_location }}</span>
+                                    <div class="flex min-w-0 flex-1 flex-col">
+                                        <div class="flex min-w-0 items-baseline gap-2 truncate">
+                                            <span
+                                                class="truncate text-base font-semibold text-gray-900"
+                                            >
+                                                {{ user.name || user.email }}
+                                            </span>
+                                            @if (user.email && user.name) {
+                                                <span
+                                                    class="truncate font-mono text-sm font-normal text-gray-500"
+                                                >
+                                                    {{ user.email }}
+                                                </span>
+                                            }
+                                        </div>
+                                        <div
+                                            class="flex items-center gap-1 truncate text-sm text-gray-500"
+                                        >
+                                            <icon class="-ml-1 text-base">place</icon>
+                                            <span class="truncate">{{ user.office_location }}</span>
+                                        </div>
                                     </div>
-                                </div>
+                                    <icon class="text-gray-400">chevron_right</icon>
+                                </button>
                             </li>
                         }
                     </ul>
+                    @if (locate_error(); as err) {
+                        <p
+                            class="mt-3 flex items-center gap-1 text-sm text-red-600"
+                            role="alert"
+                        >
+                            <icon class="text-base">error</icon>
+                            <span>{{ err }}</span>
+                        </p>
+                    }
                 }
             </div>
         </div>
@@ -148,9 +169,13 @@ const INITIAL_STATE: DirectoryState = { users: [], loading: false, error: false 
 })
 export class DirectoryPage {
     private readonly _systems = inject(SystemService);
+    private readonly _locate = inject(LocateService);
+    private readonly _router = inject(Router);
 
     readonly search = signal('');
     readonly system = this._systems.system;
+    readonly locating_id = signal<string | null>(null);
+    readonly locate_error = signal<string | null>(null);
 
     readonly search_length = computed(() => this.search().trim().length);
 
@@ -184,6 +209,42 @@ export class DirectoryPage {
 
     onSearch(value: string): void {
         this.search.set(value);
+    }
+
+    onSelect(user: DirectoryUser, key: string): void {
+        if (this.locating_id()) return;
+        const system = this.system();
+        if (!system) {
+            this.locate_error.set('No system configured.');
+            return;
+        }
+        this.locating_id.set(key);
+        this.locate_error.set(null);
+        this._locate.locate(system, user).subscribe({
+            next: ({ lat, lng }) => {
+                this.locating_id.set(null);
+                this._router.navigate(this._wayfindingCommands(), {
+                    queryParams: { lat, lng },
+                    queryParamsHandling: 'merge',
+                });
+            },
+            error: (err: unknown) => {
+                this.locating_id.set(null);
+                if (err instanceof LocationNotFoundError) {
+                    this.locate_error.set(
+                        `No map location could be found for ${user.name || user.email || 'this user'}.`,
+                    );
+                    return;
+                }
+                const message = err instanceof Error ? err.message : 'Unable to locate user.';
+                this.locate_error.set(message);
+            },
+        });
+    }
+
+    private _wayfindingCommands(): unknown[] {
+        const sys = this.system();
+        return sys ? ['/', sys, 'wayfinding'] : ['/wayfinding'];
     }
 
     trackUser(index: number, user: DirectoryUser): string {
