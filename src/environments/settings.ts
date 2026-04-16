@@ -10,6 +10,9 @@ export interface AppSettings {
     };
     app: {
         name: string;
+        signage_url: string;
+        /** Delay in ms before returning to signage from any sub-route */
+        idle_timeout_ms: number;
     };
 }
 
@@ -25,5 +28,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
     },
     app: {
         name: 'Signage Wayfinder',
+        signage_url: 'https://placeos-nonprod.avit.it.ucla.edu/signage',
+        idle_timeout_ms: 5 * 60 * 1000,
     },
 };
