@@ -2,7 +2,7 @@ name: BUILD
 
 on:
     push:
-        branches: [develop, release/**, rc/**, release, main]
+        branches: [develop, trunk, release/**, rc/**, release, main]
 
 jobs:
     setup:
