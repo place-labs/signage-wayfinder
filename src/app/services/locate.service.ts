@@ -6,8 +6,14 @@ import { map, switchMap } from 'rxjs/operators';
 
 import { SettingsService } from './settings.service';
 
-interface DirectoryUser {
+export interface DirectoryUser {
+    id?: string;
+    name?: string;
+    email?: string;
     office_location?: string;
+    department?: string;
+    phone?: string;
+    photo?: string;
     [key: string]: unknown;
 }
 

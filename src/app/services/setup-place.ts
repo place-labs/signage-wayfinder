@@ -36,9 +36,7 @@ export async function setupPlace(settings: PlaceSettings): Promise<void> {
         delay: 300,
     };
 
-    if (localStorage) {
-        localStorage.setItem('mock', `${!!mock && !location.href.includes('mock=false')}`);
-    }
+    localStorage.setItem('mock', `${!!mock && !location.href.includes('mock=false')}`);
 
     return setup(config);
 }

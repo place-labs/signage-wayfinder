@@ -1,4 +1,12 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import {
+    AfterViewInit,
+    Component,
+    ElementRef,
+    ViewChild,
+    computed,
+    inject,
+    signal,
+} from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { executeOnSystem } from '@placeos/ts-client';
@@ -13,19 +21,12 @@ import {
 } from 'rxjs/operators';
 
 import { IconComponent } from '../components/icon.component';
-import { LocateService, LocationNotFoundError } from '../services/locate.service';
+import {
+    DirectoryUser,
+    LocateService,
+    LocationNotFoundError,
+} from '../services/locate.service';
 import { SystemService } from '../services/system.service';
-
-interface DirectoryUser {
-    id?: string;
-    name?: string;
-    email?: string;
-    office_location?: string;
-    department?: string;
-    phone?: string;
-    photo?: string;
-    [key: string]: unknown;
-}
 
 interface DirectoryState {
     users: DirectoryUser[];
@@ -167,10 +168,16 @@ const INITIAL_STATE: DirectoryState = { users: [], loading: false, error: false 
         </div>
     `,
 })
-export class DirectoryPage {
+export class DirectoryPage implements AfterViewInit {
     private readonly _systems = inject(SystemService);
     private readonly _locate = inject(LocateService);
     private readonly _router = inject(Router);
+
+    @ViewChild('input') private readonly _input?: ElementRef<HTMLInputElement>;
+
+    ngAfterViewInit(): void {
+        queueMicrotask(() => this._input?.nativeElement.focus());
+    }
 
     readonly search = signal('');
     readonly system = this._systems.system;

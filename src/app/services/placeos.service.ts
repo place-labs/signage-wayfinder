@@ -1,14 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
-import {
-    currentUser,
-    invalidateToken,
-    isOnline,
-    logout,
-    onlineState,
-    setAPI_Key,
-    token,
-} from '@placeos/ts-client';
-import { Observable } from 'rxjs';
+import { onlineState, setAPI_Key } from '@placeos/ts-client';
 
 import { DEFAULT_SETTINGS } from '../../environments/settings';
 import { SettingsService } from './settings.service';
@@ -34,25 +25,5 @@ export class PlaceOSService {
         await this._settings.init().catch((err) => console.error('Settings init failed', err));
 
         this.ready.set(true);
-    }
-
-    get user$(): Observable<unknown> {
-        return currentUser();
-    }
-
-    get token(): string {
-        return token();
-    }
-
-    isAuthenticated(): boolean {
-        return isOnline();
-    }
-
-    invalidate(): void {
-        invalidateToken();
-    }
-
-    logout(): void {
-        logout();
     }
 }

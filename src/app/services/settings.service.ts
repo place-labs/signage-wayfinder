@@ -1,12 +1,26 @@
 import { Injectable, WritableSignal, signal } from '@angular/core';
 import { authority, isMock, queryZones, showMetadata } from '@placeos/ts-client';
-import { BehaviorSubject, Observable, catchError, lastValueFrom, of } from 'rxjs';
+import { catchError, lastValueFrom, of } from 'rxjs';
 
-import { AppSettings, DEFAULT_SETTINGS } from '../../environments/settings';
+import { DEFAULT_SETTINGS } from '../../environments/settings';
 
 const APP_METADATA_KEY = 'wayfinder_app';
 
 type HashMap<T = unknown> = Record<string, T>;
+
+const QUERY_OVERRIDES: HashMap = (() => {
+    if (typeof location === 'undefined') return {};
+    const search = location.search || location.hash.split('?')[1] || '';
+    const params = new URLSearchParams(search.replace(/^\?/, ''));
+    const raw = params.get('location');
+    if (!raw) return {};
+    const [lat, lng] = raw.split(',').map((v) => v.trim());
+    if (!lat || !lng) return {};
+    const lat_num = Number(lat);
+    const lng_num = Number(lng);
+    if (!Number.isFinite(lat_num) || !Number.isFinite(lng_num)) return {};
+    return { default_location: `${lat_num},${lng_num}` };
+})();
 
 function getByPath(path: string[], source: HashMap | undefined): unknown {
     if (!source) return undefined;
@@ -20,33 +34,24 @@ function getByPath(path: string[], source: HashMap | undefined): unknown {
 
 @Injectable({ providedIn: 'root' })
 export class SettingsService {
-    private readonly _initialised = new BehaviorSubject(false);
-    private readonly _overrides = new BehaviorSubject<HashMap>({});
     private readonly _signals: Record<string, WritableSignal<unknown>> = {};
 
     private _organisation_id: string | null = null;
-
-    readonly ready = signal(false);
-
-    readonly initialised: Observable<boolean> = this._initialised.asObservable();
-    readonly overrides$: Observable<HashMap> = this._overrides.asObservable();
+    private _overrides: HashMap = {};
+    private readonly _query_overrides: HashMap = QUERY_OVERRIDES;
 
     async init(): Promise<void> {
         await this._loadOrganisation();
         await this._loadAppMetadata();
         this._refreshSignals();
-        this._initialised.next(true);
-        this.ready.set(true);
-    }
-
-    get organisationId(): string | null {
-        return this._organisation_id;
     }
 
     get<T = unknown>(key: string): T | undefined {
         const keys = key.split('.');
         if (keys[0] === 'app') {
-            const override = getByPath(keys.slice(1), this._overrides.getValue());
+            const query = getByPath(keys.slice(1), this._query_overrides);
+            if (query != null) return query as T;
+            const override = getByPath(keys.slice(1), this._overrides);
             if (override != null) return override as T;
         }
         return getByPath(keys, DEFAULT_SETTINGS as unknown as HashMap) as T | undefined;
@@ -84,7 +89,7 @@ export class SettingsService {
 
     private async _loadAppMetadata(): Promise<void> {
         if (!this._organisation_id) {
-            this._overrides.next({});
+            this._overrides = {};
             return;
         }
         const metadata = await lastValueFrom(
@@ -92,8 +97,7 @@ export class SettingsService {
                 catchError(() => of({ details: {} as HashMap })),
             ),
         );
-        const details = (metadata as { details?: HashMap } | undefined)?.details ?? {};
-        this._overrides.next(details);
+        this._overrides = (metadata as { details?: HashMap } | undefined)?.details ?? {};
     }
 
     private _refreshSignals(): void {
@@ -102,5 +106,3 @@ export class SettingsService {
         }
     }
 }
-
-export type { AppSettings };

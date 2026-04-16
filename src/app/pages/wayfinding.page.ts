@@ -97,6 +97,7 @@ export class WayfindingPage {
     readonly embed_url = computed<string | null>(() => {
         const key = asString(this.maps_api_key()).trim();
         const origin = normaliseLatLng(this.default_location());
+        console.log('Origin:', origin);
         if (!key || !origin) return null;
         const destination = this.destination();
         const params = new URLSearchParams({ key });
