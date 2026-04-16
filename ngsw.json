@@ -1,7 +1,7 @@
 {
   "configVersion": 1,
-  "timestamp": 1776378508534,
-  "index": "/index.html",
+  "timestamp": 1776379092828,
+  "index": "./index.html",
   "assetGroups": [
     {
       "name": "app",
@@ -11,10 +11,10 @@
         "ignoreVary": true
       },
       "urls": [
-        "/favicon.ico",
-        "/index.html",
-        "/main-ALDCYBLA.js",
-        "/styles-VFGFY4E4.css"
+        "./favicon.ico",
+        "./index.html",
+        "./main-ALDCYBLA.js",
+        "./styles-VFGFY4E4.css"
       ],
       "patterns": []
     },
@@ -26,22 +26,22 @@
         "ignoreVary": true
       },
       "urls": [
-        "/media/material-symbols-outlined-EWM62JAJ.woff2",
-        "/media/material-symbols-rounded-O2WJTDKO.woff2",
-        "/media/material-symbols-sharp-4TUTEVOQ.woff2"
+        "./media/material-symbols-outlined-EWM62JAJ.woff2",
+        "./media/material-symbols-rounded-O2WJTDKO.woff2",
+        "./media/material-symbols-sharp-4TUTEVOQ.woff2"
       ],
       "patterns": []
     }
   ],
   "dataGroups": [],
   "hashTable": {
-    "/favicon.ico": "9c39f434fe1261f68c5e3eefdf734630d99c5670",
-    "/index.html": "005e18eeb5be345d101aa763e0d0fe6a142973be",
-    "/main-ALDCYBLA.js": "5bfb50624edbad6e7fabcf16c95616e77f3f11b2",
-    "/media/material-symbols-outlined-EWM62JAJ.woff2": "3df48979f156a25fcd9afbb37e3d289f211b43da",
-    "/media/material-symbols-rounded-O2WJTDKO.woff2": "1c0aa57682c77424a77a299fef53b50457c6712a",
-    "/media/material-symbols-sharp-4TUTEVOQ.woff2": "c92009b741174cb9e27ad0d410b59b1759d6f734",
-    "/styles-VFGFY4E4.css": "7e09ec5f5b14fd36f0ea35d043568199e72c44a8"
+    "./favicon.ico": "9c39f434fe1261f68c5e3eefdf734630d99c5670",
+    "./index.html": "445d1884985f8ea0286baa8dfd5d05b046c8d246",
+    "./main-ALDCYBLA.js": "5bfb50624edbad6e7fabcf16c95616e77f3f11b2",
+    "./media/material-symbols-outlined-EWM62JAJ.woff2": "3df48979f156a25fcd9afbb37e3d289f211b43da",
+    "./media/material-symbols-rounded-O2WJTDKO.woff2": "1c0aa57682c77424a77a299fef53b50457c6712a",
+    "./media/material-symbols-sharp-4TUTEVOQ.woff2": "c92009b741174cb9e27ad0d410b59b1759d6f734",
+    "./styles-VFGFY4E4.css": "7e09ec5f5b14fd36f0ea35d043568199e72c44a8"
   },
   "navigationUrls": [
     {
