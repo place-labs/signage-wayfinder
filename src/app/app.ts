@@ -59,7 +59,7 @@ import { SignagePlayer } from './signage-player';
                 @if (hide_signage()) {
                     <button
                         matRipple
-                        routerLink="/"
+                        [routerLink]="['/', system()]"
                         class="absolute! top-3 right-3 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-blue-600 bg-blue-500 text-white shadow-md"
                         aria-label="Back to signage"
                     >
@@ -87,6 +87,7 @@ export class App implements OnInit {
 
     protected readonly title = signal('signage-wayfinder');
     protected readonly ready = this._placeos.ready;
+    protected readonly system = this._system.system;
 
     protected readonly active_tab = toSignal(
         this._router.events.pipe(
