@@ -1,4 +1,12 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import {
+    AfterViewInit,
+    Component,
+    ElementRef,
+    ViewChild,
+    computed,
+    inject,
+    signal,
+} from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -85,6 +93,7 @@ const SEARCH_INITIAL: SearchState = { suggestions: [], loading: false, error: nu
                                 >search</icon
                             >
                             <input
+                                #input
                                 type="search"
                                 autocomplete="off"
                                 placeholder="Search for a location…"
@@ -191,13 +200,19 @@ const SEARCH_INITIAL: SearchState = { suggestions: [], loading: false, error: nu
         `,
     ],
 })
-export class WayfindingPage {
+export class WayfindingPage implements AfterViewInit {
     private readonly _route = inject(ActivatedRoute);
     private readonly _router = inject(Router);
     private readonly _sanitizer = inject(DomSanitizer);
     private readonly _settings = inject(SettingsService);
     private readonly _locate = inject(LocateService);
     private readonly _systems = inject(SystemService);
+
+    @ViewChild('input') private readonly _input?: ElementRef<HTMLInputElement>;
+
+    ngAfterViewInit(): void {
+        queueMicrotask(() => this._input?.nativeElement.focus());
+    }
 
     readonly maps_api_key = this._settings.signal<unknown>('maps_api_key', '');
     readonly places_api_key = this._settings.signal<unknown>('places_api_key', '');

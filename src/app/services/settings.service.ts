@@ -5,21 +5,44 @@ import { catchError, lastValueFrom, of } from 'rxjs';
 import { DEFAULT_SETTINGS } from '../../environments/settings';
 
 const APP_METADATA_KEY = 'wayfinder_app';
+const LOCATION_OVERRIDE_STORAGE_KEY = 'wayfinder.default_location_override';
 
 type HashMap<T = unknown> = Record<string, T>;
+
+function readStoredLocationOverride(): string | null {
+    try {
+        return sessionStorage?.getItem(LOCATION_OVERRIDE_STORAGE_KEY) ?? null;
+    } catch {
+        return null;
+    }
+}
+
+function writeStoredLocationOverride(value: string): void {
+    try {
+        sessionStorage?.setItem(LOCATION_OVERRIDE_STORAGE_KEY, value);
+    } catch {
+        /* storage unavailable — ignore */
+    }
+}
 
 const QUERY_OVERRIDES: HashMap = (() => {
     if (typeof location === 'undefined') return {};
     const search = location.search || location.hash.split('?')[1] || '';
     const params = new URLSearchParams(search.replace(/^\?/, ''));
     const raw = params.get('location');
-    if (!raw) return {};
-    const [lat, lng] = raw.split(',').map((v) => v.trim());
-    if (!lat || !lng) return {};
-    const lat_num = Number(lat);
-    const lng_num = Number(lng);
-    if (!Number.isFinite(lat_num) || !Number.isFinite(lng_num)) return {};
-    return { default_location: `${lat_num},${lng_num}` };
+    if (raw) {
+        const [lat, lng] = raw.split(',').map((v) => v.trim());
+        const lat_num = Number(lat);
+        const lng_num = Number(lng);
+        if (lat && lng && Number.isFinite(lat_num) && Number.isFinite(lng_num)) {
+            const value = `${lat_num},${lng_num}`;
+            writeStoredLocationOverride(value);
+            return { default_location: value };
+        }
+    }
+    const stored = readStoredLocationOverride();
+    if (stored) return { default_location: stored };
+    return {};
 })();
 
 function getByPath(path: string[], source: HashMap | undefined): unknown {
