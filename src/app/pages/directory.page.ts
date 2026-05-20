@@ -52,6 +52,7 @@ const INITIAL_STATE: DirectoryState = { users: [], loading: false, error: false 
                         keyboard
                         type="search"
                         autocomplete="off"
+                        inputmode="none"
                         placeholder="Search users by name or email…"
                         class="w-full rounded-xl border border-gray-300 bg-white py-3 pr-10 pl-10 text-base shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                         [value]="search()"

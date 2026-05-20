@@ -99,6 +99,7 @@ const SEARCH_INITIAL: SearchState = { suggestions: [], loading: false, error: nu
                                 type="search"
                                 autocomplete="off"
                                 placeholder="Search for a location…"
+                                inputmode="none"
                                 class="w-full rounded-xl border border-gray-300 bg-white py-3 pr-10 pl-10 text-base shadow-md outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                                 [value]="search()"
                                 (input)="onSearch($any($event.target).value)"
