@@ -14,6 +14,7 @@ import { of } from 'rxjs';
 import { catchError, debounceTime, distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 
 import { IconComponent } from '../components/icon.component';
+import { VirtualKeyboardDirective } from '../components/virtual-keyboard.component';
 import { LocateService, PlaceSuggestion } from '../services/locate.service';
 import { SettingsService } from '../services/settings.service';
 import { SystemService } from '../services/system.service';
@@ -61,7 +62,7 @@ const SEARCH_INITIAL: SearchState = { suggestions: [], loading: false, error: nu
 
 @Component({
     selector: 'wayfinding-page',
-    imports: [IconComponent],
+    imports: [IconComponent, VirtualKeyboardDirective],
     template: `
         <div class="relative h-full w-full bg-gray-200">
             @if (embed_url(); as url) {
@@ -94,6 +95,7 @@ const SEARCH_INITIAL: SearchState = { suggestions: [], loading: false, error: nu
                             >
                             <input
                                 #input
+                                keyboard
                                 type="search"
                                 autocomplete="off"
                                 placeholder="Search for a location…"
@@ -120,16 +122,12 @@ const SEARCH_INITIAL: SearchState = { suggestions: [], loading: false, error: nu
                                 class="mt-2 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg"
                             >
                                 @if (search_state().loading) {
-                                    <div
-                                        class="flex items-center gap-2 p-3 text-sm text-gray-600"
-                                    >
+                                    <div class="flex items-center gap-2 p-3 text-sm text-gray-600">
                                         <icon class="animate-spin text-lg">progress_activity</icon>
                                         <span>Searching…</span>
                                     </div>
                                 } @else if (search_state().error) {
-                                    <div
-                                        class="flex items-center gap-2 p-3 text-sm text-red-600"
-                                    >
+                                    <div class="flex items-center gap-2 p-3 text-sm text-red-600">
                                         <icon class="text-lg">error</icon>
                                         <span>{{ search_state().error }}</span>
                                     </div>
@@ -137,10 +135,7 @@ const SEARCH_INITIAL: SearchState = { suggestions: [], loading: false, error: nu
                                     <div class="p-3 text-sm text-gray-500">No matches.</div>
                                 } @else {
                                     <ul class="flex max-h-80 flex-col overflow-y-auto">
-                                        @for (
-                                            s of search_state().suggestions;
-                                            track s.place_id
-                                        ) {
+                                        @for (s of search_state().suggestions; track s.place_id) {
                                             <li>
                                                 <button
                                                     type="button"
@@ -208,7 +203,8 @@ export class WayfindingPage implements AfterViewInit {
     private readonly _locate = inject(LocateService);
     private readonly _systems = inject(SystemService);
 
-    @ViewChild('input') private readonly _input?: ElementRef<HTMLInputElement>;
+    @ViewChild('input', { read: ElementRef })
+    private readonly _input?: ElementRef<HTMLInputElement>;
 
     ngAfterViewInit(): void {
         queueMicrotask(() => this._input?.nativeElement.focus());
@@ -283,9 +279,7 @@ export class WayfindingPage implements AfterViewInit {
 
     readonly search_state = toSignal(this._search_state$, { initialValue: SEARCH_INITIAL });
 
-    readonly show_dropdown = computed(
-        () => this.focused() && this.search().trim().length >= 2,
-    );
+    readonly show_dropdown = computed(() => this.focused() && this.search().trim().length >= 2);
 
     onSearch(value: string): void {
         this.search.set(value);

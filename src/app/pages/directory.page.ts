@@ -21,6 +21,7 @@ import {
 } from 'rxjs/operators';
 
 import { IconComponent } from '../components/icon.component';
+import { VirtualKeyboardDirective } from '../components/virtual-keyboard.component';
 import { DirectoryUser, LocateService, LocationNotFoundError } from '../services/locate.service';
 import { SystemService } from '../services/system.service';
 
@@ -34,7 +35,7 @@ const INITIAL_STATE: DirectoryState = { users: [], loading: false, error: false 
 
 @Component({
     selector: 'directory-page',
-    imports: [IconComponent],
+    imports: [IconComponent, VirtualKeyboardDirective],
     template: `
         <div
             class="flex h-full w-full flex-col bg-[var(--mat-sys-surface)] text-[var(--mat-sys-on-surface)]"
@@ -48,12 +49,13 @@ const INITIAL_STATE: DirectoryState = { users: [], loading: false, error: false 
                     >
                     <input
                         #input
+                        keyboard
                         type="search"
                         autocomplete="off"
                         placeholder="Search users by name or email…"
                         class="w-full rounded-xl border border-gray-300 bg-white py-3 pr-10 pl-10 text-base shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                         [value]="search()"
-                        (input)="onSearch(input.value)"
+                        (input)="onSearch($any($event.target).value)"
                     />
                     @if (search()) {
                         <button
@@ -168,7 +170,8 @@ export class DirectoryPage implements AfterViewInit {
     private readonly _locate = inject(LocateService);
     private readonly _router = inject(Router);
 
-    @ViewChild('input') private readonly _input?: ElementRef<HTMLInputElement>;
+    @ViewChild('input', { read: ElementRef })
+    private readonly _input?: ElementRef<HTMLInputElement>;
 
     ngAfterViewInit(): void {
         queueMicrotask(() => this._input?.nativeElement.focus());

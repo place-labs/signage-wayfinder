@@ -5,10 +5,13 @@ import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } fro
 import { filter, map, startWith } from 'rxjs/operators';
 
 import { IconComponent } from './components/icon.component';
+import { VirtualKeyboardComponent } from './components/virtual-keyboard.component';
 import { IdleService } from './services/idle.service';
 import { PlaceOSService } from './services/placeos.service';
 import { SystemService } from './services/system.service';
 import { SignagePlayer } from './signage-player';
+
+const OSK_STORAGE_KEY = 'signage-wayfinder:osk';
 
 @Component({
     selector: 'app-root',
@@ -117,8 +120,44 @@ export class App implements OnInit {
     });
 
     async ngOnInit(): Promise<void> {
+        this._initVirtualKeyboard();
         this._system.init();
         await this._placeos.init();
         this._idle.start();
+    }
+
+    private _initVirtualKeyboard(): void {
+        const enabled_by_url = this._hasEnabledOskParam();
+        const enabled_by_storage = this._storedOskEnabled();
+        VirtualKeyboardComponent.enabled = enabled_by_url || enabled_by_storage;
+        if (enabled_by_url) this._storeOskEnabled();
+    }
+
+    private _hasEnabledOskParam(): boolean {
+        const query = this._queryString();
+        if (!query) return false;
+        return new URLSearchParams(query).get('osk') === 'true';
+    }
+
+    private _queryString(): string {
+        const location = globalThis.location;
+        const hash_query = location?.hash?.split('?')[1]?.split('#')[0] ?? '';
+        return hash_query || location?.search?.slice(1) || '';
+    }
+
+    private _storedOskEnabled(): boolean {
+        try {
+            return globalThis.localStorage?.getItem(OSK_STORAGE_KEY) === 'true';
+        } catch {
+            return false;
+        }
+    }
+
+    private _storeOskEnabled(): void {
+        try {
+            globalThis.localStorage?.setItem(OSK_STORAGE_KEY, 'true');
+        } catch {
+            // Ignore storage failures, such as private browsing restrictions.
+        }
     }
 }
